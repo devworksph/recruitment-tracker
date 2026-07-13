@@ -1,9 +1,9 @@
 export class CreateCandidateDto {
     id!: string;
     name!: string;
-    recruiter?: string;
-    unitManager?: string;
-    unit?: string;
+    recruiter!: string;
+    unitManager!: string;
+    unit!: string;
     createdAt!: string;
 }
 

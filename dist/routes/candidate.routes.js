@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const tsyringe_1 = require("tsyringe");
+const CandidateController_1 = require("../controllers/CandidateController");
+const ValidationMiddleware_1 = require("../middleware/ValidationMiddleware");
+const CandidateValidator_1 = require("../validators/CandidateValidator");
+const CandidateValidator_2 = require("../validators/CandidateValidator");
+const router = (0, express_1.Router)();
+const controller = tsyringe_1.container.resolve(CandidateController_1.CandidateController);
+router.get("/candidates", controller.getAll);
+router.post("/candidate/create", ValidationMiddleware_1.ValidationMiddleware.validate(CandidateValidator_1.createCandidateSchema), controller.create);
+router.patch("/candidates/:candidateId/stages/:stageId", ValidationMiddleware_1.ValidationMiddleware.validate(CandidateValidator_2.updateStageSchema), controller.updateStage);
+exports.default = router;

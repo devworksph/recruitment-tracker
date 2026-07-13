@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "tsyringe";
 import { CandidateService } from "../services/CandidateService";
-import { CandidateStageService } from "../services/CandidateStageService";
 
 @injectable()
 export class CandidateController {
@@ -36,9 +35,11 @@ export class CandidateController {
         req: Request,
         res: Response
     ): Promise<Response> => {
+        const candiDateId = req.params as unknown as string;
+        const stageId = req.params as unknown as string;
         await this.service.updateStage(
-            req.params.candidateId,
-            req.params.stageId,
+            candiDateId,
+            stageId,
             req.body
         );
 

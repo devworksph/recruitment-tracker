@@ -42,20 +42,9 @@ export class CandidateGateway {
         const conn: PoolConnection = await db.getConnection();
         try {
             await conn.beginTransaction();
+            
             await conn.execute(
-                `
-                INSERT INTO candidates
-                (
-                    id,
-                    name,
-                    recruiter,
-                    unit_manager,
-                    unit,
-                    created_at
-                )
-                VALUES
-                (?, ?, ?, ?, ?, ?)
-                `,
+                "INSERT INTO candidates (id, name, recruiter, unit_manager, unit, created_at) VALUES (?, ?, ?, ?, ?)",
                 [
                     candidate.id,
                     candidate.name,
@@ -67,7 +56,7 @@ export class CandidateGateway {
             );
 
             // candidate stages
-            const values: unknown[] = [];
+            const values: (string | number | Date | null)[] = [];
             const placeholders: string[] = [];
             for (const stageId of DEFAULT_STAGES) {
 
