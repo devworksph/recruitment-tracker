@@ -32,9 +32,9 @@ let CandidateController = class CandidateController {
         });
     };
     updateStage = async (req, res) => {
-        const candiDateId = req.params;
-        const stageId = req.params;
-        await this.service.updateStage(candiDateId, stageId, req.body);
+        const candidateId = req.params.candidateId;
+        const stageId = req.params.stageId;
+        await this.service.updateStage(candidateId, stageId, req.body);
         return res.status(200).json({
             success: true,
             message: "Stage updated."

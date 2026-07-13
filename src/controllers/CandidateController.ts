@@ -35,10 +35,11 @@ export class CandidateController {
         req: Request,
         res: Response
     ): Promise<Response> => {
-        const candiDateId = req.params as unknown as string;
-        const stageId = req.params as unknown as string;
+        const candidateId = req.params.candidateId as unknown as string;
+        const stageId = req.params.stageId as unknown as string;
+
         await this.service.updateStage(
-            candiDateId,
+            candidateId,
             stageId,
             req.body
         );
