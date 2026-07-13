@@ -10,8 +10,24 @@ const controller = container.resolve(CandidateController);
 
 router.get(
     "/candidates",
+    (req, res, next) => {
+        res.set({
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+            "Surrogate-Control": "no-store"
+        });
+
+        next();
+    },
     controller.getAll
 );
+
+router.get("/candidates", (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+
+    // return data...
+});
 
 router.post(
     "/candidate/create",
