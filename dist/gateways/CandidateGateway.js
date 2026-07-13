@@ -41,7 +41,7 @@ let CandidateGateway = class CandidateGateway {
         const conn = await Database_1.db.getConnection();
         try {
             await conn.beginTransaction();
-            await conn.execute("INSERT INTO candidates (id, name, recruiter, unit_manager, unit, created_at) VALUES (?, ?, ?, ?, ?)", [
+            await conn.execute("INSERT INTO candidates (id, name, recruiter, unit_manager, unit, created_at) VALUES (?, ?, ?, ?, ?, ?)", [
                 candidate.id,
                 candidate.name,
                 candidate.recruiter,

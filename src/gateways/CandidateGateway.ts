@@ -44,7 +44,7 @@ export class CandidateGateway {
             await conn.beginTransaction();
             
             await conn.execute(
-                "INSERT INTO candidates (id, name, recruiter, unit_manager, unit, created_at) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO candidates (id, name, recruiter, unit_manager, unit, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                 [
                     candidate.id,
                     candidate.name,
