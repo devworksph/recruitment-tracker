@@ -8,12 +8,33 @@ import candidateRoutes from "./routes/candidate.routes";
 const app = express();
 const baseRoute = '/api';
 
+const allowedOrigins = [
+    "http://localhost:8080",
+    "https://sites.google.com",
+    "https://*.googleusercontent.com"
+];
+
+
 app.use(cors({
-    origin: [
-        'http://localhost:8080',
-        'https://sites.google.com/view/t2lia-g-site-for-leaders/recruitment/recruitment-tracker'
-    ]
+    origin: (origin, callback) => {
+
+        // Allow requests with no origin (Postman, curl, server-to-server)
+        if (!origin) {
+            return callback(null, true);
+        }
+
+        const isAllowed =
+            allowedOrigins.includes(origin) ||
+            origin.endsWith(".googleusercontent.com");
+
+        if (isAllowed) {
+            return callback(null, true);
+        }
+
+        return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    }
 }));
+
 app.use(express.json());
 
 app.use(baseRoute, statusRoutes);
