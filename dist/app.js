@@ -12,7 +12,8 @@ const app = (0, express_1.default)();
 const baseRoute = '/api';
 app.use((0, cors_1.default)({
     origin: [
-        'http://localhost:8080'
+        'http://localhost:8080',
+        'https://sites.google.com/view/t2lia-g-site-for-leaders/recruitment/recruitment-tracker'
     ]
 }));
 app.use(express_1.default.json());
