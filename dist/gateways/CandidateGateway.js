@@ -63,7 +63,7 @@ let CandidateGateway = class CandidateGateway {
                     candidate_id,
                     stage_id,
                     status,
-                    stage_date,
+                    date,
                     remarks
                 )
                 VALUES
