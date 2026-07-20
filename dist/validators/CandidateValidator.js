@@ -34,7 +34,7 @@ exports.updateStageSchema = {
             type: "string",
             enum: [
                 "status",
-                "stageDate",
+                "date",
                 "remarks"
             ]
         },

@@ -11,6 +11,15 @@ export class CandidateService {
     ) {}
 
     public async getAll(): Promise<any[]> {
+        const formatDate = (date: Date | null) => {
+            if (!date) return null;
+
+            return [
+                date.getFullYear(),
+                String(date.getMonth() + 1).padStart(2, "0"),
+                String(date.getDate()).padStart(2, "0")
+            ].join("-");
+        };
         const rows = await this.gateway.getAll();
         const candidates = new Map<string, any>();
         for (const row of rows) {
@@ -29,7 +38,7 @@ export class CandidateService {
             const candidate = candidates.get(row.id);
             candidate.stages[row.stage_id] = {
                 status: row.status,
-                date: row.stage_date,
+                date: formatDate(row.date),
                 remarks: row.remarks
             };
         }
@@ -52,5 +61,13 @@ export class CandidateService {
             dto.field,
             dto.value
         );
+    }
+
+    public async delete(id: string): Promise<void> {
+        const deleted = await this.gateway.delete(id);
+        if (!deleted) {
+            throw new Error("Candidate not found.");
+        }
+
     }
 }

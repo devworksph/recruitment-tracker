@@ -21,6 +21,15 @@ let CandidateService = class CandidateService {
         this.gateway = gateway;
     }
     async getAll() {
+        const formatDate = (date) => {
+            if (!date)
+                return null;
+            return [
+                date.getFullYear(),
+                String(date.getMonth() + 1).padStart(2, "0"),
+                String(date.getDate()).padStart(2, "0")
+            ].join("-");
+        };
         const rows = await this.gateway.getAll();
         const candidates = new Map();
         for (const row of rows) {
@@ -38,7 +47,7 @@ let CandidateService = class CandidateService {
             const candidate = candidates.get(row.id);
             candidate.stages[row.stage_id] = {
                 status: row.status,
-                date: row.stage_date,
+                date: formatDate(row.date),
                 remarks: row.remarks
             };
         }
@@ -49,6 +58,12 @@ let CandidateService = class CandidateService {
     }
     async updateStage(candidateId, stageId, dto) {
         await this.gateway.updateStage(candidateId, stageId, dto.field, dto.value);
+    }
+    async delete(id) {
+        const deleted = await this.gateway.delete(id);
+        if (!deleted) {
+            throw new Error("Candidate not found.");
+        }
     }
 };
 exports.CandidateService = CandidateService;

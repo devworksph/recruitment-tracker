@@ -13,7 +13,7 @@ const Stages_1 = require("../constants/Stages");
 let CandidateGateway = class CandidateGateway {
     fieldMap = {
         status: "status",
-        stageDate: "stage_date",
+        date: "date",
         remarks: "remarks"
     };
     async getAll() {
@@ -27,11 +27,12 @@ let CandidateGateway = class CandidateGateway {
                 c.created_at,
                 s.stage_id,
                 s.status,
-                s.stage_date,
+                s.date,
                 s.remarks
             FROM candidates c
             LEFT JOIN candidate_stages s
                 ON c.id = s.candidate_id
+            WHERE is_deleted = 0
             ORDER BY c.created_at DESC, s.stage_id
             `);
         return rows;
@@ -97,6 +98,15 @@ let CandidateGateway = class CandidateGateway {
         ]);
     }
     ;
+    async delete(id) {
+        const sql = `
+            UPDATE candidates
+            SET is_deleted = 1
+            WHERE id = ?
+        `;
+        const [result] = await Database_1.db.execute(sql, [id]);
+        return result.affectedRows > 0;
+    }
 };
 exports.CandidateGateway = CandidateGateway;
 exports.CandidateGateway = CandidateGateway = __decorate([

@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe";
-import { RowDataPacket } from "mysql2";
+import { RowDataPacket, ResultSetHeader } from "mysql2";
 import { PoolConnection } from "mysql2/promise";
 import { db } from "../database/Database";
 import { ICandidate } from "../interface/ICandidate";
@@ -10,7 +10,7 @@ export class CandidateGateway {
 
     private readonly fieldMap: Record<string, string> = {
         status: "status",
-        stageDate: "stage_date",
+        date: "date",
         remarks: "remarks"
     };
 
@@ -26,11 +26,12 @@ export class CandidateGateway {
                 c.created_at,
                 s.stage_id,
                 s.status,
-                s.stage_date,
+                s.date,
                 s.remarks
             FROM candidates c
             LEFT JOIN candidate_stages s
                 ON c.id = s.candidate_id
+            WHERE is_deleted = 0
             ORDER BY c.created_at DESC, s.stage_id
             `
         );
@@ -102,7 +103,6 @@ export class CandidateGateway {
         field: string,
         value: string
     ): Promise<void> {
-
         const column = this.fieldMap[field];
 
         if (!column) {
@@ -122,4 +122,19 @@ export class CandidateGateway {
             stageId
         ]);
     };
+
+    public async delete(id: string): Promise<boolean> {
+        const sql = `
+            UPDATE candidates
+            SET is_deleted = 1
+            WHERE id = ?
+        `;
+
+        const [result] = await db.execute<ResultSetHeader>(
+            sql,
+            [id]
+        );
+
+        return result.affectedRows > 0;
+    }
 }

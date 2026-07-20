@@ -41,4 +41,9 @@ router.patch(
     controller.updateStage
 );
 
+router.patch(
+    "/candidates/:id",
+    controller.delete
+);
+
 export default router;

@@ -12,6 +12,7 @@ const app = (0, express_1.default)();
 const baseRoute = '/api';
 const allowedOrigins = [
     "http://localhost:8080",
+    "http://127.0.0.1:8080",
     "https://sites.google.com",
     "https://*.googleusercontent.com"
 ];

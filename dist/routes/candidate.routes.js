@@ -23,4 +23,5 @@ router.get("/candidates", (req, res) => {
 });
 router.post("/candidate/create", ValidationMiddleware_1.ValidationMiddleware.validate(CandidateValidator_1.createCandidateSchema), controller.create);
 router.patch("/candidates/:candidateId/stages/:stageId", ValidationMiddleware_1.ValidationMiddleware.validate(CandidateValidator_2.updateStageSchema), controller.updateStage);
+router.patch("/candidates/:id", controller.delete);
 exports.default = router;

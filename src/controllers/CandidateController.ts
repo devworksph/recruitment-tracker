@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { injectable, inject } from "tsyringe";
 import { CandidateService } from "../services/CandidateService";
 
@@ -48,5 +48,23 @@ export class CandidateController {
             success: true,
             message: "Stage updated."
         });
+    };
+
+    public delete = async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        try {
+            const id = req.params.id as string;
+
+            await this.service.delete(id);
+
+            res.sendStatus(204);
+
+        } catch (error) {
+            next(error);
+        }
+
     };
 }

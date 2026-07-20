@@ -40,6 +40,16 @@ let CandidateController = class CandidateController {
             message: "Stage updated."
         });
     };
+    delete = async (req, res, next) => {
+        try {
+            const id = req.params.id;
+            await this.service.delete(id);
+            res.sendStatus(204);
+        }
+        catch (error) {
+            next(error);
+        }
+    };
 };
 exports.CandidateController = CandidateController;
 exports.CandidateController = CandidateController = __decorate([
