@@ -118,7 +118,9 @@ select.unit-sel{font-family:'Barlow',sans-serif;font-size:11.5px;border:1.5px so
 .confirm-title{font-weight:700;font-size:14px;margin-bottom:7px;}
 .confirm-body{font-size:12px;color:#555;margin-bottom:15px;line-height:1.5;}
 .confirm-footer{display:flex;gap:7px;}
-
+#error-modal {
+  z-index: 200;
+}
 /* BACKUP MODAL */
 
 </style>
@@ -206,6 +208,19 @@ select.unit-sel{font-family:'Barlow',sans-serif;font-size:11.5px;border:1.5px so
             <div class="panel-r" id="detail">
                 <div class="no-sel"><div class="ni">📋</div><p>Select a
                         candidate to view</p></div>
+            </div>
+        </div>
+
+        <div class="overlay" id="error-modal">
+            <div class="modal">
+                <div class="modal-head"><div class="modal-title">Error</div></div>
+                <div class="modal-body">
+                  <div id="error-modal-message"></div>
+                  <div class="modal-footer">
+                      <button class="btn btn-wh"
+                          onclick="closeModal('error-modal');">Close</button>
+                  </div>
+                </div>
             </div>
         </div>
 
@@ -538,7 +553,7 @@ async function doDelete() {
 
   // close("del-modal");render();
 
-   try {
+  try {
     const token =
       sessionStorage.getItem(
         "googleIdToken"
@@ -552,42 +567,33 @@ async function doDelete() {
     });
 
     if (response.status === 401) {
-      alert("Please sign in.");
+      openM('error-modal', 'Please sign in.');
+      //alert("Please sign in.");
       return;
-    }
-
-    if (response.status === 403) {
-      alert(
-        "You don't have permission to delete candidates."
-      );
+    } else if (response.status === 403) {
+      openM('error-modal', 'You dont have permission to delete candidates.');
 
       return;
-    }
-
-    if (!response.ok) {
-        alert("Failed to delete candidate.");
-        return;
-    }
-
-    if (!response.ok) {
-      throw new Error("Unable to delete candidate.");
     } else {
-      data = data.filter(c => c.id !== delTarget);
+      if (!response.ok) {
+        openM('error-modal', 'Failed to delete candidate.');
+        return;
+      } else {
+        data = data.filter(c => c.id !== delTarget);
 
-      if (selId === delTarget) {
-        selId = null;
+        if (selId === delTarget) {
+          selId = null;
+        }
+
+        delTarget = null;
+
+        close("del-modal");
+        render();
       }
-
-      delTarget = null;
-
-      close("del-modal");
-      render();
     }
-} catch (err) {
-  alert(err.message);
-}
-
-  
+  } catch (err) {
+    alert(err.message);
+  }
 }
 
 // EXPORT TO EXCEL
@@ -709,7 +715,18 @@ function parseCSV(text){
 }
 
 // MODAL HELPERS
-function openM(id){document.getElementById(id).classList.add("show");}
+function openM(id, message = '') {
+  const modal = document.getElementById(id);
+
+  if (message != '') {
+    const messageElement = modal.querySelector("#error-modal-message");
+    if (messageElement) {
+        messageElement.textContent = message;
+    }
+  }
+
+  modal.classList.add("show");
+}
 function close(id) {
   document.getElementById(id).classList.remove("show");
 }
