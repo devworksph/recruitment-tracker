@@ -4,6 +4,8 @@ import { CandidateController } from "../controllers/CandidateController";
 import { ValidationMiddleware } from "../middleware/ValidationMiddleware";
 import { createCandidateSchema } from "../validators/CandidateValidator";
 import { updateStageSchema } from "../validators/CandidateValidator";
+import { GoogleAuthMiddleware } from "../middleware/GoogleAuthMiddleware";
+import { AuthorizationMiddleware } from "../middleware/AuthorizationMiddleware";
 
 const router = Router();
 const controller = container.resolve(CandidateController);
@@ -43,6 +45,10 @@ router.patch(
 
 router.patch(
     "/candidates/:id",
+    GoogleAuthMiddleware.authenticate,
+    AuthorizationMiddleware.requireRole(
+        "ADMIN"
+    ),
     controller.delete
 );
 

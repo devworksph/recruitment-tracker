@@ -6,6 +6,8 @@ const CandidateController_1 = require("../controllers/CandidateController");
 const ValidationMiddleware_1 = require("../middleware/ValidationMiddleware");
 const CandidateValidator_1 = require("../validators/CandidateValidator");
 const CandidateValidator_2 = require("../validators/CandidateValidator");
+const GoogleAuthMiddleware_1 = require("../middleware/GoogleAuthMiddleware");
+const AuthorizationMiddleware_1 = require("../middleware/AuthorizationMiddleware");
 const router = (0, express_1.Router)();
 const controller = tsyringe_1.container.resolve(CandidateController_1.CandidateController);
 router.get("/candidates", (req, res, next) => {
@@ -23,5 +25,5 @@ router.get("/candidates", (req, res) => {
 });
 router.post("/candidate/create", ValidationMiddleware_1.ValidationMiddleware.validate(CandidateValidator_1.createCandidateSchema), controller.create);
 router.patch("/candidates/:candidateId/stages/:stageId", ValidationMiddleware_1.ValidationMiddleware.validate(CandidateValidator_2.updateStageSchema), controller.updateStage);
-router.patch("/candidates/:id", controller.delete);
+router.patch("/candidates/:id", GoogleAuthMiddleware_1.GoogleAuthMiddleware.authenticate, AuthorizationMiddleware_1.AuthorizationMiddleware.requireRole("ADMIN"), controller.delete);
 exports.default = router;
