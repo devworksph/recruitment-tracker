@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>T2LIA Recruitment Tracker</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap"
+            rel="stylesheet">
+        <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:#f0f0f0;color:#1a1a1a;font-size:13px;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+
+/* HEADER */
+.hdr{background:#C0392B;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hdr-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:#fff;line-height:1;}
+.hdr-sub{font-size:10px;color:rgba(255,255,255,.6);letter-spacing:.5px;margin-top:1px;}
+.hdr-right{display:flex;align-items:center;gap:7px;}
+.saved-lbl{font-size:10.5px;color:rgba(255,255,255,.7);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;transition:opacity .3s;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:9px 14px;flex-shrink:0;}
+.stat{background:#fff;border-radius:7px;padding:8px 11px;border-left:3px solid #ddd;}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;}
+.stat-l{font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;}
+
+/* BODY */
+.body{display:grid;grid-template-columns:300px 1fr;gap:9px;padding:0 14px 12px;flex:1;overflow:hidden;min-height:0;}
+
+/* LIST PANEL */
+.panel-l{display:flex;flex-direction:column;gap:6px;overflow:hidden;}
+.search-bar{display:flex;gap:5px;}
+.pills{display:flex;gap:4px;flex-wrap:wrap;}
+.unit-row{display:flex;align-items:center;gap:5px;}
+.unit-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa;white-space:nowrap;}
+.clist{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px;}
+.clist::-webkit-scrollbar{width:3px;}
+.clist::-webkit-scrollbar-thumb{background:#ddd;border-radius:2px;}
+
+.card{background:#fff;border:1.5px solid #e5e5e5;border-radius:7px;padding:10px 11px;cursor:pointer;transition:border-color .15s,box-shadow .15s;}
+.card:hover{border-color:#C0392B;box-shadow:0 2px 6px rgba(192,57,43,.1);}
+.card.active{border-color:#C0392B;background:#fff8f8;}
+.c-name{font-weight:700;font-size:13px;}
+.c-unit{font-size:10px;color:#C0392B;font-weight:700;margin-top:1px;}
+.c-meta{font-size:10px;color:#aaa;margin-top:1px;}
+.c-stage{font-size:10.5px;color:#555;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prog{height:4px;background:#eee;border-radius:2px;margin:5px 0 2px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:2px;transition:width .3s;}
+.prog-pct{font-size:10px;font-weight:700;text-align:right;}
+.empty{text-align:center;padding:28px 12px;color:#ccc;}
+.empty .ei{font-size:28px;margin-bottom:6px;}
+.empty p{font-size:11.5px;line-height:1.6;}
+
+/* DETAIL PANEL */
+.panel-r{background:#fff;border-radius:7px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;display:flex;flex-direction:column;}
+.no-sel{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#ccc;gap:8px;}
+.no-sel .ni{font-size:36px;}
+.no-sel p{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+
+.d-head{background:#1a1a1a;padding:11px 14px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.d-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:#fff;}
+.d-meta{font-size:10px;color:#777;margin-top:1px;}
+.d-pct{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;}
+.d-pct-l{font-size:9px;color:#666;text-transform:uppercase;letter-spacing:.5px;text-align:right;}
+.d-prog{height:3px;background:#eee;flex-shrink:0;}
+.d-prog-fill{height:100%;transition:width .3s;}
+
+.tbl-wrap{flex:1;overflow-y:auto;}
+.tbl-wrap::-webkit-scrollbar{width:3px;}
+.tbl-wrap::-webkit-scrollbar-thumb{background:#ddd;border-radius:2px;}
+table{width:100%;border-collapse:collapse;table-layout:fixed;}
+thead th{background:#f8f8f8;border-bottom:2px solid #e5e5e5;padding:7px 8px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#999;text-align:left;position:sticky;top:0;z-index:2;}
+thead th:nth-child(1){width:24%;}
+thead th:nth-child(2){width:16%;text-align:center;}
+thead th:nth-child(3){width:14%;text-align:center;}
+thead th:nth-child(4){width:46%;}
+tbody td{padding:7px 8px;border-bottom:1px solid #f5f5f5;vertical-align:top;}
+tbody tr:nth-child(even) td{background:#fafafa;}
+tbody tr:hover td{background:#fdf7f7;}
+.st-name{font-weight:600;font-size:12px;}
+.st-desc{font-size:10px;color:#aaa;margin-top:1px;}
+
+/* CONTROLS */
+input[type=text],input[type=date],textarea{border:1.5px solid #ddd;border-radius:4px;padding:4px 6px;font-family:'Barlow',sans-serif;font-size:11px;color:#1a1a1a;background:#fff;width:100%;outline:none;transition:border-color .2s;}
+input[type=text]:focus,input[type=date]:focus,textarea:focus{border-color:#C0392B;}
+textarea{resize:vertical;min-height:34px;line-height:1.5;}
+select.st-sel{border:1.5px solid #ddd;border-radius:4px;padding:3px 4px;font-family:'Barlow',sans-serif;font-size:11px;outline:none;cursor:pointer;width:100%;}
+select.unit-sel{font-family:'Barlow',sans-serif;font-size:11.5px;border:1.5px solid #ddd;border-radius:5px;padding:3px 6px;outline:none;flex:1;}
+.st-sel:focus,.unit-sel:focus{border-color:#C0392B;}
+.st-ns{background:#f5f5f5;color:#888;}
+.st-ip{background:#fff3e0;color:#e65100;font-weight:700;}
+.st-co{background:#e8f5e9;color:#1b5e20;font-weight:700;}
+.st-oh{background:#e3f2fd;color:#0d47a1;}
+.st-dr{background:#ffebee;color:#b71c1c;}
+
+/* BUTTONS */
+.btn{cursor:pointer;border:none;border-radius:5px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+.btn-red{background:#C0392B;color:#fff;padding:7px 13px;font-size:12px;}
+.btn-red:hover{background:#a52a1e;}
+.btn-wh{background:#fff;color:#555;padding:7px 11px;font-size:12px;border:1.5px solid #ddd;}
+.btn-wh:hover{background:#f5f5f5;}
+.btn-del{background:#fff;color:#c62828;padding:5px 8px;font-size:10.5px;border:1px solid #ef9a9a;}
+.btn-del:hover{background:#ffebee;}
+.pill{cursor:pointer;border:1.5px solid #ddd;border-radius:16px;padding:3px 10px;font-family:'Barlow Condensed',sans-serif;font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#888;background:#fff;transition:all .15s;}
+.pill:hover{border-color:#C0392B;color:#C0392B;}
+.pill.on{background:#C0392B;border-color:#C0392B;color:#fff;}
+
+/* MODALS */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;align-items:center;justify-content:center;}
+.overlay.show{display:flex;}
+.modal{background:#fff;border-radius:9px;width:370px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.18);}
+.modal-head{background:#C0392B;padding:12px 16px;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;color:#fff;}
+.modal-body{padding:15px;display:flex;flex-direction:column;gap:10px;}
+.field-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:2px;display:block;}
+.modal-footer{display:flex;gap:7px;margin-top:2px;}
+.confirm-box{background:#fff;border-radius:9px;width:300px;padding:18px;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.confirm-title{font-weight:700;font-size:14px;margin-bottom:7px;}
+.confirm-body{font-size:12px;color:#555;margin-bottom:15px;line-height:1.5;}
+.confirm-footer{display:flex;gap:7px;}
+
+/* BACKUP MODAL */
+
+</style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+    </head>
+    <body>
+        <!-- HEADER -->
+        <div class="hdr">
+            <div>
+                <div class="hdr-title">T2LIA Recruitment Tracker</div>
+                <div class="hdr-sub">Titanium 2 Life Insurance Agency Inc. · All
+                    data saved in your browser</div>
+            </div>
+            <div class="hdr-right">
+                <div
+                  id="g_id_onload"
+                  data-client_id="906757118108-e0quupv0ift8mor7afnrpg3es50fj2r3.apps.googleusercontent.com"
+                  data-callback="handleGoogleLogin">
+                </div>
+
+                <div class="g_id_signin"></div>
+                <span class="saved-lbl" id="saved-lbl"></span>
+                <button class="btn btn-wh"
+                    style="font-size:11px;padding:5px 10px;"
+                    onclick="exportExcel()">📥 Export Excel</button>
+                <button class="btn btn-wh"
+                    style="font-size:11px;padding:5px 10px;"
+                    onclick="document.getElementById('import-file').click()">📤
+                    Import Excel</button>
+                <input type="file" id="import-file" accept=".xlsx,.xls"
+                    style="display:none;" onchange="importExcel(this)">
+                <button class="btn btn-red"
+                    style="padding:7px 13px;font-size:12px;"
+                    onclick="openAdd()">+ Add Candidate</button>
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="stats">
+            <div class="stat" style="border-color:#4a5568;"><div class="stat-n"
+                    id="s-total" style="color:#4a5568;">0</div><div
+                    class="stat-l">Total</div></div>
+            <div class="stat" style="border-color:#e65100;"><div class="stat-n"
+                    id="s-active" style="color:#e65100;">0</div><div
+                    class="stat-l">Active</div></div>
+            <div class="stat" style="border-color:#1b5e20;"><div class="stat-n"
+                    id="s-lic" style="color:#1b5e20;">0</div><div
+                    class="stat-l">Licensed ✓</div></div>
+            <div class="stat" style="border-color:#b71c1c;"><div class="stat-n"
+                    id="s-drop" style="color:#b71c1c;">0</div><div
+                    class="stat-l">Dropped</div></div>
+        </div>
+
+        <!-- BODY -->
+        <div class="body">
+            <!-- LEFT -->
+            <div class="panel-l">
+                <div class="search-bar">
+                    <input type="text" id="srch"
+                        placeholder="🔍 Search name, recruiter, unit..."
+                        oninput="render()" style="flex:1;font-size:12px;">
+                </div>
+                <div class="pills">
+                    <span class="pill on" data-f="All"
+                        onclick="setFilter(this)">All</span>
+                    <span class="pill" data-f="Active"
+                        onclick="setFilter(this)">Active</span>
+                    <span class="pill" data-f="Licensed"
+                        onclick="setFilter(this)">Licensed</span>
+                    <span class="pill" data-f="On Hold"
+                        onclick="setFilter(this)">On Hold</span>
+                    <span class="pill" data-f="Dropped"
+                        onclick="setFilter(this)">Dropped</span>
+                </div>
+                <div class="unit-row">
+                    <span class="unit-lbl">Unit:</span>
+                    <select class="unit-sel" id="unitSel" onchange="render()">
+                        <option value>All Units</option>
+                    </select>
+                </div>
+                <div class="clist" id="clist"></div>
+            </div>
+
+            <!-- RIGHT -->
+            <div class="panel-r" id="detail">
+                <div class="no-sel"><div class="ni">📋</div><p>Select a
+                        candidate to view</p></div>
+            </div>
+        </div>
+
+        <!-- ADD MODAL -->
+        <div class="overlay" id="add-modal">
+            <div class="modal">
+                <div class="modal-head"><div class="modal-title">Add New
+                        Candidate</div></div>
+                <div class="modal-body">
+                    <div><label class="field-lbl">Candidate Full Name
+                            *</label><input type="text" id="f-name"
+                            placeholder="Full name"
+                            onkeydown="if(event.key==='Enter')doAdd()"></div>
+                    <div><label class="field-lbl">Recruiter</label><input
+                            type="text" id="f-rec"
+                            placeholder="Recruiter name"></div>
+                    <div><label class="field-lbl">Unit Manager</label><input
+                            type="text" id="f-um"
+                            placeholder="Unit Manager name"></div>
+                    <div><label class="field-lbl">Unit (e.g. Team
+                            Jhovy)</label><input type="text" id="f-unit"
+                            placeholder="e.g. Team Jhovy"></div>
+                    <div><label class="field-lbl">Date Added</label><input
+                            type="date" id="f-date"></div>
+                    <div class="modal-footer">
+                        <button class="btn btn-red" onclick="doAdd()"
+                            style="flex:1;">Add Candidate</button>
+                        <button class="btn btn-wh"
+                            onclick="closeModal('add-modal');">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DELETE MODAL -->
+        <div class="overlay" id="del-modal">
+            <div class="confirm-box">
+                <div class="confirm-title">Remove this candidate?</div>
+                <div class="confirm-body" id="del-body"></div>
+                <div class="confirm-footer">
+                    <button class="btn btn-red" onclick="doDelete()"
+                        style="flex:1;">Yes, Remove</button>
+                    <button class="btn btn-wh"
+                        onclick="closeModal('del-modal');">Cancel</button>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+          async function handleGoogleLogin(response) {
+console.log("LOGIN SUCCESS", response);
+            const googleIdToken = response.credential;
+
+            sessionStorage.setItem(
+                "googleIdToken",
+                googleIdToken
+            );
+          }
+          var STAGES = [
+            {id:"initial_interview",icon:"🤝",label:"Initial Interview",desc:"NBRI + 1-on-1 BYB"},
+            {id:"cds_endorsement",icon:"📧",label:"CDS Endorsement",desc:"Endorsed to BM"},
+            {id:"cds",icon:"🎯",label:"Career Discovery Session",desc:"CDS completed"},
+            {id:"final_interview",icon:"📋",label:"Final Interview",desc:"Assessment + scoring"},
+            {id:"prelicensing",icon:"📱",label:"Pre-Licensing Setup",desc:"Telegram, data gathering"},
+            {id:"exam_prep",icon:"📚",label:"Exam Preparation",desc:"Reviewer + mock exams"},
+            {id:"ic_exam",icon:"✍️",label:"IC Exam",desc:"Actual exam taken"},
+            {id:"post_exam",icon:"✅",label:"Post-Exam Requirements",desc:"Fees, docs, PruExpert"},
+            {id:"licensing",icon:"🏆",label:"Licensing & Contract",desc:"Officially licensed"},
+          ];
+          var STATUSES=["Not Started","In Progress","Completed","On Hold","Dropped"];
+          var SCLASS={"Not Started":"st-ns","In Progress":"st-ip","Completed":"st-co","On Hold":"st-oh","Dropped":"st-dr"};
+          var SCOL={"Not Started":"#aaa","In Progress":"#e65100","Completed":"#1b5e20","On Hold":"#0d47a1","Dropped":"#b71c1c"};
+
+          var KEY="t2lia_tracker_v1";
+          var data=[];
+          var selId=null;
+          var filter="All";
+          var delTarget=null;
+          var saveTimer=null;
+
+          // STORAGE
+          async function load() {
+            try {
+              const response = await fetch(
+                  "/api/candidates"
+              );
+
+              if (!response.ok) {
+                throw new Error("Unable to load candidates.");
+              }
+
+              data = await response.json();
+              render();
+          } catch (err) {
+            console.error(err);
+            data = [];
+          }
+            // try {
+            //   var raw=localStorage.getItem(KEY);
+            //   if(raw)data=JSON.parse(raw);
+            // } catch(e) {}
+          }
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(function(){
+    try{
+      localStorage.setItem(KEY,JSON.stringify(data));
+      showSaved();
+    }catch(e){}
+  },400);
+}
+function showSaved(){
+  var el=document.getElementById("saved-lbl");
+  el.textContent="✓ Saved";el.style.opacity="1";
+  setTimeout(function(){el.style.opacity="0";},2000);
+}
+
+// HELPERS
+function uid(){return"c"+Date.now()+Math.random().toString(36).slice(2,5);}
+function newStages(){var s={};STAGES.forEach(function(st){s[st.id]={status:"Not Started",date:"",remarks:""};});return s;}
+function pct(stages){var d=STAGES.filter(function(s){return(stages[s.id]||{}).status==="Completed";}).length;return Math.round(d/STAGES.length*100);}
+function curStage(stages){
+  var ip=STAGES.find(function(s){return(stages[s.id]||{}).status==="In Progress";});
+  if(ip)return ip.icon+" "+ip.label;
+  var last=-1;STAGES.forEach(function(s,i){if((stages[s.id]||{}).status==="Completed")last=i;});
+  if(last===STAGES.length-1)return"🏆 Fully Licensed";
+  if(last>=0)return STAGES[last+1].icon+" "+STAGES[last+1].label;
+  return STAGES[0].icon+" "+STAGES[0].label;
+}
+function isAct(c){return STAGES.some(function(s){return(c.stages[s.id]||{}).status==="In Progress";});}
+function isLic(c){return(c.stages.licensing||{}).status==="Completed";}
+function isDrop(c){return STAGES.some(function(s){return(c.stages[s.id]||{}).status==="Dropped";});}
+function isOH(c){return STAGES.some(function(s){return(c.stages[s.id]||{}).status==="On Hold";})&&!isAct(c);}
+function x(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function col(c){return isLic(c)?"#1b5e20":isDrop(c)?"#e57373":"#C0392B";}
+
+// FILTER
+function setFilter(el){document.querySelectorAll(".pill").forEach(function(p){p.classList.remove("on");});el.classList.add("on");filter=el.dataset.f;render();}
+function filtered(){
+  var q=(document.getElementById("srch").value||"").toLowerCase();
+  var u=document.getElementById("unitSel").value||"";
+  return data.filter(function(c){
+    var ok=!q||c.name.toLowerCase().includes(q)||(c.recruiter||"").toLowerCase().includes(q)||(c.unit||"").toLowerCase().includes(q)||(c.unitManager||"").toLowerCase().includes(q);
+    if(!ok)return false;
+    if(u&&(c.unit||"").toLowerCase()!==u.toLowerCase())return false;
+    if(filter==="All")return true;
+    if(filter==="Active")return isAct(c);
+    if(filter==="Licensed")return isLic(c);
+    if(filter==="On Hold")return isOH(c);
+    if(filter==="Dropped")return isDrop(c);
+    return true;
+  });
+}
+
+// RENDER
+function render(){renderStats();renderUnits();renderList();renderDetail();}
+function renderStats(){
+  document.getElementById("s-total").textContent=data.length;
+  document.getElementById("s-active").textContent=data.filter(isAct).length;
+  document.getElementById("s-lic").textContent=data.filter(isLic).length;
+  document.getElementById("s-drop").textContent=data.filter(function(c){return isDrop(c)||isOH(c);}).length;
+}
+function renderUnits(){
+  var sel=document.getElementById("unitSel");
+  var cur=sel.value;
+  var units=[];
+  data.forEach(function(c){if(c.unit&&!units.includes(c.unit))units.push(c.unit);});
+  units.sort();
+  sel.innerHTML='<option value="">All Units</option>'+units.map(function(u){return'<option value="'+x(u)+'"'+(cur===u?' selected':'')+'>'+x(u)+'</option>';}).join('');
+}
+function renderList(){
+  var list=document.getElementById("clist");
+  var f=filtered();
+  if(!f.length){
+    list.innerHTML='<div class="empty"><div class="ei">'+(data.length===0?"👥":"🔍")+'</div><p>'+(data.length===0?"No candidates yet.<br>Click <strong>+ Add Candidate</strong> to start.":"No candidates match your search.")+"</p></div>";
+    return;
+  }
+  list.innerHTML=f.map(function(c){
+    var p=pct(c.stages);var clr=col(c);var lbl=curStage(c.stages);var d=isDrop(c);
+    return'<div class="card'+(selId===c.id?" active":"")+'" onclick="select(\''+c.id+'\')">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div class="c-name">'+x(c.name)+'</div>'
+      +(c.unit?'<div class="c-unit">'+x(c.unit)+'</div>':'')
+      +'<div class="c-meta">'+(c.recruiter?"Rec: "+x(c.recruiter):"")+(c.unitManager?" · UM: "+x(c.unitManager):"")+'</div>'
+      +'</div><div class="prog-pct" style="color:'+clr+';">'+p+'%</div></div>'
+      +'<div class="prog"><div class="prog-fill" style="width:'+p+'%;background:'+clr+';"></div></div>'
+      +'<div class="c-stage" style="color:'+(d?"#c62828":"#555")+';">'+(d?"⚠️ Has dropped stage":"→ "+lbl)+'</div>'
+      +(c.createdAt?'<div style="font-size:9.5px;color:#ccc;margin-top:2px;">Added: '+c.createdAt+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+function renderDetail(){
+  var det=document.getElementById("detail");
+  var c=data.find(function(x){return x.id===selId;});
+  if(!c){det.innerHTML='<div class="no-sel"><div class="ni">📋</div><p>Select a candidate to view</p></div>';return;}
+  var p=pct(c.stages);var clr=col(c);
+  var meta=[c.unit?"🏷 "+x(c.unit):"",c.recruiter?"Rec: "+x(c.recruiter):"",c.unitManager?"UM: "+x(c.unitManager):"",c.createdAt?"Added: "+c.createdAt:""].filter(Boolean).join(" · ");
+  var rows=STAGES.map(function(st){
+    var sd=c.stages[st.id]||{status:"Not Started",date:"",remarks:""};
+    var cls=SCLASS[sd.status]||"st-ns";
+    var opts=STATUSES.map(function(s){return'<option value="'+s+'"'+(sd.status===s?" selected":"")+'>'+s+'</option>';}).join('');
+    return'<tr>'
+      +'<td><div class="st-name">'+st.icon+" "+x(st.label)+'</div><div class="st-desc">'+x(st.desc)+'</div></td>'
+      +'<td style="text-align:center;"><select class="st-sel '+cls+'" onchange="upd(\''+c.id+'\',\''+st.id+'\',\'status\',this.value)">'+opts+'</select></td>'
+      +'<td><input type="date" value="'+x(sd.date||'')+'" onchange="upd(\''+c.id+'\',\''+st.id+'\',\'date\',this.value)" style="font-size:10px;padding:3px 4px;"></td>'
+      +'<td><textarea onchange="upd(\''+c.id+'\',\''+st.id+'\',\'remarks\',this.value)" style="font-size:11px;min-height:32px;padding:3px 5px;">'+x(sd.remarks||'')+'</textarea></td>'
+      +'</tr>';
+  }).join('');
+  det.innerHTML=
+    '<div class="d-head">'
+    +'<div><div class="d-name">'+x(c.name)+'</div><div class="d-meta">'+meta+'</div></div>'
+    +'<div style="display:flex;align-items:center;gap:8px;">'
+    +'<div><div class="d-pct" style="color:'+clr+';">'+p+'%</div><div class="d-pct-l">Complete</div></div>'
+    +'<button class="btn btn-del" onclick="askDel(\''+c.id+'\')">🗑 Remove</button>'
+    +'</div></div>'
+    +'<div class="d-prog"><div class="d-prog-fill" style="width:'+p+'%;background:'+clr+';"></div></div>'
+    +'<div class="tbl-wrap"><table><thead><tr>'
+    +'<th>Stage</th><th>Status</th><th>Date</th><th>Remarks / Notes</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+// ACTIONS
+function select(id){
+  selId=id;
+  renderList();renderDetail();
+}
+
+async function upd(cid,sid,field,val){
+  var c=data.find(function(x){return x.id===cid;});
+  if(!c)return;
+  if(!c.stages[sid])c.stages[sid]={status:"Not Started",date:"",remarks:""};
+  c.stages[sid][field]=val;
+  if(field==="status"){
+    var sel=document.querySelector('[onchange*="\''+cid+'\'"][onchange*="\''+sid+'\'"]');
+    if(sel){sel.className="st-sel "+(SCLASS[val]||"st-ns");}
+  }
+  var p=pct(c.stages);var clr=col(c);
+  var pe=document.querySelector(".d-pct");var pf=document.querySelector(".d-prog-fill");
+  if(pe){pe.textContent=p+"%";pe.style.color=clr;}
+  if(pf){pf.style.width=p+"%;";pf.style.background=clr;}
+  renderStats();
+  renderList();
+  
+  await fetch(
+    `/api/candidates/${cid}/stages/${sid}`,
+    {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          field,
+          "value": val
+        })
+    }
+  );
+}
+
+// ADD
+function openAdd(){
+  document.getElementById("f-name").value="";
+  document.getElementById("f-rec").value="";
+  document.getElementById("f-um").value="";
+  document.getElementById("f-unit").value="";
+  document.getElementById("f-date").value=new Date().toISOString().slice(0,10);
+  openM("add-modal");
+  setTimeout(function(){document.getElementById("f-name").focus();},80);
+}
+
+// Add Candidate function
+async function doAdd() {
+    const name = document.getElementById("f-name").value.trim();
+
+    if (!name) {
+        document.getElementById("f-name").focus();
+        return;
+    }
+
+    const candidate = {
+        id: uid(),
+        name,
+        recruiter: document.getElementById("f-rec").value.trim(),
+        unitManager: document.getElementById("f-um").value.trim(),
+        unit: document.getElementById("f-unit").value.trim(),
+        stages: newStages(),
+        createdAt:
+            document.getElementById("f-date").value ||
+            new Date().toISOString().slice(0, 10)
+    };
+
+    const response = await fetch("/api/candidate/create", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(candidate)
+    });
+
+    if (!response.ok) {
+        alert("Unable to save candidate.");
+        return;
+    }
+
+    data.unshift({
+        ...candidate,
+        stages: newStages()
+    });
+
+    selId = candidate.id;
+
+    close("add-modal");
+    render();
+}
+
+// DELETE
+function askDel(id){
+  delTarget=id;
+  var c=data.find(function(x){return x.id===id;});
+  document.getElementById("del-body").innerHTML="Permanently remove <strong>"+x(c?c.name:"")+"</strong> and all their data?";
+  openM("del-modal");
+}
+
+async function closeModal(id) {
+  close(id);render();
+}
+
+async function doDelete() {
+  data=data.filter(function(c){return c.id!==delTarget;});
+
+  // close("del-modal");render();
+
+   try {
+    const token =
+      sessionStorage.getItem(
+        "googleIdToken"
+      );
+
+    const response = await fetch(`/api/candidates/${selId}`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+    });
+
+    if (response.status === 401) {
+      alert("Please sign in.");
+      return;
+    }
+
+    if (response.status === 403) {
+      alert(
+        "You don't have permission to delete candidates."
+      );
+
+      return;
+    }
+
+    if (!response.ok) {
+        alert("Failed to delete candidate.");
+        return;
+    }
+
+    if (!response.ok) {
+      throw new Error("Unable to delete candidate.");
+    } else {
+      data = data.filter(c => c.id !== delTarget);
+
+      if (selId === delTarget) {
+        selId = null;
+      }
+
+      delTarget = null;
+
+      close("del-modal");
+      render();
+    }
+} catch (err) {
+  alert(err.message);
+}
+
+  
+}
+
+// EXPORT TO EXCEL
+function exportExcel(){
+  if(!data.length){alert("No candidates to export yet.");return;}
+
+  // Build rows
+  var stageHeaders=STAGES.map(function(s){return[s.label+" - Status",s.label+" - Date",s.label+" - Remarks"];}).flat();
+  var headers=["Name","Recruiter","Unit Manager","Unit","Date Added","Progress %"].concat(stageHeaders);
+
+  var rows=data.map(function(c){
+    var base=[c.name||"",c.recruiter||"",c.unitManager||"",c.unit||"",c.createdAt||"",pct(c.stages)+"%"];
+    var stageCols=STAGES.map(function(s){
+      var sd=c.stages[s.id]||{status:"Not Started",date:"",remarks:""};
+      return[sd.status||"Not Started",sd.date||"",sd.remarks||""];
+    }).flat();
+    return base.concat(stageCols);
+  });
+
+  // Build CSV (works everywhere, Excel opens it perfectly)
+  var csv=[headers].concat(rows).map(function(row){
+    return row.map(function(cell){
+      var s=String(cell||"").replace(/"/g,'""');
+      return(/[",\n\r]/.test(s)?'"'+s+'"':s);
+    }).join(",");
+  }).join("\r\n");
+
+  // Add BOM for Excel to correctly read UTF-8 (emojis, Filipino names)
+  var bom="\uFEFF";
+  var blob=new Blob([bom+csv],{type:"text/csv;charset=utf-8;"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;
+  a.download="T2LIA_Candidates_"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+// IMPORT FROM EXCEL (CSV)
+function importExcel(input){
+  var file=input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var text=e.target.result;
+      // Strip BOM if present
+      if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);
+      var rows=parseCSV(text);
+      if(rows.length<2){alert("File appears empty or invalid.");input.value="";return;}
+      var headers=rows[0];
+      var nameIdx=headers.indexOf("Name");
+      if(nameIdx<0){alert("This doesn't look like a T2LIA export file. Make sure you're uploading a file exported from this tracker.");input.value="";return;}
+
+      var recIdx=headers.indexOf("Recruiter");
+      var umIdx=headers.indexOf("Unit Manager");
+      var unitIdx=headers.indexOf("Unit");
+      var dateIdx=headers.indexOf("Date Added");
+
+      var imported=[];
+      for(var i=1;i<rows.length;i++){
+        var row=rows[i];
+        if(!row[nameIdx]||!row[nameIdx].trim())continue;
+        var c={
+          id:uid(),
+          name:row[nameIdx]||"",
+          recruiter:row[recIdx]||"",
+          unitManager:row[umIdx]||"",
+          unit:row[unitIdx]||"",
+          createdAt:row[dateIdx]||"",
+          stages:newStages()
+        };
+        STAGES.forEach(function(st){
+          var si=headers.indexOf(st.label+" - Status");
+          var di=headers.indexOf(st.label+" - Date");
+          var ri=headers.indexOf(st.label+" - Remarks");
+          if(si>=0)c.stages[st.id]={
+            status:row[si]||"Not Started",
+            date:row[di]||"",
+            remarks:row[ri]||""
+          };
+        });
+        imported.push(c);
+      }
+      if(!imported.length){alert("No valid candidates found in the file.");input.value="";return;}
+      if(!confirm("This will replace all current data with "+imported.length+" candidate(s) from the file. Continue?")){input.value="";return;}
+      data=imported;selId=null;
+      save();render();
+      alert("Successfully imported "+imported.length+" candidate(s)!");
+    }catch(err){
+      alert("Could not read file: "+err.message);
+    }
+    input.value="";
+  };
+  reader.readAsText(file,"UTF-8");
+}
+
+// Simple CSV parser (handles quoted fields with commas/newlines)
+function parseCSV(text){
+  var rows=[];var row=[];var field="";var inQ=false;
+  for(var i=0;i<text.length;i++){
+    var ch=text[i];
+    if(inQ){
+      if(ch==='"'&&text[i+1]==='"'){field+='"';i++;}
+      else if(ch==='"'){inQ=false;}
+      else{field+=ch;}
+    }else{
+      if(ch==='"'){inQ=true;}
+      else if(ch===','){row.push(field);field="";}
+      else if(ch==='\n'||(ch==='\r'&&text[i+1]==='\n')){
+        if(ch==='\r')i++;
+        row.push(field);rows.push(row);row=[];field="";
+      }else{field+=ch;}
+    }
+  }
+  if(field||row.length)row.push(field);
+  if(row.some(function(f){return f!="";}))rows.push(row);
+  return rows;
+}
+
+// MODAL HELPERS
+function openM(id){document.getElementById(id).classList.add("show");}
+function close(id) {
+  document.getElementById(id).classList.remove("show");
+}
+
+document.querySelectorAll(".overlay").forEach(function(o){
+  o.addEventListener("click",function(e){if(e.target===o)o.classList.remove("show");});
+});
+
+// START
+load();render();
+</script>
+</body>
+</html>
