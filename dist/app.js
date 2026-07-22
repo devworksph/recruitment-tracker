@@ -14,7 +14,8 @@ const allowedOrigins = [
     "http://localhost:8080",
     "http://127.0.0.1:8080",
     "https://sites.google.com",
-    "https://*.googleusercontent.com"
+    "https://*.googleusercontent.com",
+    "https://stage-recruitment.devworksph.com"
 ];
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
